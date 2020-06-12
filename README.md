@@ -108,8 +108,6 @@ Email: service@sunfounder.com
 
 ## Contact us
 
-website:
-    <ezblock.cc>
+website:<ezblock.cc>
 
-E-mail:
-    service@sunfounder.com
+E-mail:service@sunfounder.com
