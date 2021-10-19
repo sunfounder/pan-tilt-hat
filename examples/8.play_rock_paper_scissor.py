@@ -2,10 +2,11 @@
 import sys
 sys.path.append(r'/opt/ezblock')
 from vilib import Vilib
-from ezblock import WiFi
 import random
-from ezblock import print
-from ezblock import delay
+# from ezblock import WiFi
+# from ezblock import print
+# from ezblock import delay
+from time import sleep
 
 randomNum = None
 randomGes = None
@@ -17,7 +18,7 @@ game = None
 
 Vilib.camera_start(True)
 Vilib.gesture_detect_switch(True)
-WiFi().write('CN', 'MakerStarsHall', 'sunfounder')
+# WiFi().write('CN', 'MakerStarsHall', 'sunfounder')
 game = 'over'
 
 """Describe this function...
@@ -37,9 +38,9 @@ def getRandomGes():
 def detectGes():
     global randomNum, ges1, randomGes, game, ges2, detectedGes, ges3
     ges1 = Vilib.gesture_detect_object('type')
-    delay(50)
+    sleep(0.05)
     ges2 = Vilib.gesture_detect_object('type')
-    delay(50)
+    sleep(0.05)
     ges3 = Vilib.gesture_detect_object('type')
     if ges1 == ges2 and ges1 == ges3:
         detectedGes = ges1
@@ -53,7 +54,7 @@ def forever():
         getRandomGes()
         game = 'start'
         print("%s"%'Ready? show your gesture!')
-        delay(2000)
+        sleep(2)
     detectGes()
     if detectedGes != 'none':
         print("%s"%detectedGes)
@@ -69,7 +70,7 @@ def forever():
             print("%s"%'You fail')
         game = 'over'
         detectedGes = 'none'
-        delay(1000)
+        sleep(1)
 
 if __name__ == "__main__":
     while True:

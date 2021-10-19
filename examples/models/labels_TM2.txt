@@ -1,0 +1,6 @@
+0 keyboard
+1 white background
+2 circuit board
+3 ball
+4 none
+5 oled

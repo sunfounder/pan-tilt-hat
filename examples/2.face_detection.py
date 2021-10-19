@@ -2,12 +2,12 @@
 import sys
 sys.path.append(r'/opt/ezblock')
 from vilib import Vilib
-from ezblock import WiFi
-from ezblock import print
+# from ezblock import WiFi
+# from ezblock import print
 
 Vilib.camera_start(True)
 Vilib.human_detect_switch(True)
-WiFi().write('CN', 'MakerStarsHall', 'sunfounder')
+# WiFi().write('CN', 'MakerStarsHall', 'sunfounder')
 
 
 def forever():

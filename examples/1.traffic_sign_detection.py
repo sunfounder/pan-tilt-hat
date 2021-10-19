@@ -2,11 +2,10 @@
 import sys
 sys.path.append(r'/opt/ezblock')
 from vilib import Vilib
-from ezblock import WiFi
 
-Vilib.camera_start(True)
+Vilib.camera_start()
+Vilib.display()
 Vilib.traffic_sign_detect_switch(True)
-WiFi().write('CN', 'MakerStarsHall', 'sunfounder')
 
 
 def forever():

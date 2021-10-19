@@ -2,10 +2,11 @@
 import sys
 sys.path.append(r'/opt/ezblock')
 from vilib import Vilib
-from ezblock import WiFi
-from ezblock import constrain
-from ezblock import PWM
-from ezblock import Servo
+# from ezblock import WiFi
+# from ezblock import constrain
+# from ezblock import PWM
+# from ezblock import Servo
+from sunfounder_io import PWM,Servo
 
 xVal = None
 yVal = None
@@ -17,12 +18,18 @@ Vilib.color_detect_switch(True)
 Vilib.detect_color_name('red')
 panAngle = 0
 tiltAngle = 0
-WiFi().write('CN', 'MakerStarsHall', 'sunfounder')
+# WiFi().write('CN', 'MakerStarsHall', 'sunfounder')
 
 pwm_P0 = PWM("P0")
-
 pwm_P1 = PWM("P1")
 
+def limit(x,min,max):
+    if x > max:
+        return max
+    elif x < min:
+        return min
+    else:
+        return x
 
 def forever():
     global xVal, yVal, panAngle, tiltAngle
@@ -37,11 +44,15 @@ def forever():
             tiltAngle = tiltAngle + 1
         elif yVal == 1:
             tiltAngle = tiltAngle - 1
-        panAngle = constrain(panAngle, -90, 90)
-        tiltAngle = constrain(tiltAngle, -45, 25)
+        panAngle = limit(panAngle, -90, 90)
+        tiltAngle = limit(tiltAngle, -45, 25)
         Servo(pwm_P0).angle(panAngle)
         Servo(pwm_P1).angle(tiltAngle)
 
 if __name__ == "__main__":
-    while True:
-        forever()  
+    # while True:
+    #     forever()  
+    pwm_P0 = PWM("P0")
+    pwm_P1 = PWM("P1")
+    Servo(pwm_P0).angle(20)
+    Servo(pwm_P1).angle(20)
