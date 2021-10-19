@@ -7,7 +7,8 @@ from vilib import Vilib
 # from ezblock import delay
 # from ezblock import run_command
 
-Vilib.camera_start(True)
+Vilib.camera_start()
+Vilib.display()
 Vilib.gesture_calibrate_switch(True)
 # WiFi().write('CN', 'MakerStarsHall', 'sunfounder')
 print("%s"%'Ready？Start the calibration!')

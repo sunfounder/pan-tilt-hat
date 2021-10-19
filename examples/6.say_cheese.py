@@ -7,7 +7,8 @@ from vilib import Vilib
 # from ezblock import delay
 from time import sleep
 
-Vilib.camera_start(True)
+Vilib.camera_start()
+Vilib.display()
 Vilib.human_detect_switch(True)
 # WiFi().write('CN', 'MakerStarsHall', 'sunfounder')
 

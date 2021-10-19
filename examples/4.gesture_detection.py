@@ -10,7 +10,8 @@ ges1 = None
 ges2 = None
 ges3 = None
 
-Vilib.camera_start(True)
+Vilib.camera_start()
+Vilib.display()
 Vilib.gesture_detect_switch(True)
 # WiFi().write('CN', 'MakerStarsHall', 'sunfounder')
 

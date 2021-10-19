@@ -9,7 +9,8 @@ from vilib import Vilib
 from sunfunder_io import PWM,Servo
 from time import sleep
 
-Vilib.camera_start(True)
+Vilib.camera_start()
+Vilib.display()
 Vilib.traffic_sign_detect_switch(True)
 # WiFi().write('CN', 'MakerStarsHall', 'sunfounder')
 
