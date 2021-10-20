@@ -16,8 +16,8 @@ import threading
 CAMERA_WIDTH = 640
 CAMERA_HEIGHT = 480
 
-model_path = './models/detect.tflite'
-labels_path = './models/coco_labels.txt'
+model_path = '../models/detect.tflite'
+labels_path = '../models/coco_labels.txt'
 
 def load_labels(path):
   """Loads the labels file. Supports files with or without index numbers."""

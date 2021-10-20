@@ -24,9 +24,9 @@ os.chdir('/home/pi/vilib')
 run_command('sudo python3 setup.py install')
 
 
-# install mideaPipe
-print("install mideaPipe ...")
-run_command('sudo pip3 install mediapipe-rpi3')
+# # install mediapipe-rpi3
+# print("install mediapipe-rpi3 ...")
+# run_command('sudo pip3 install mediapipe-rpi3')
 
 
 #install sunfounder_io
