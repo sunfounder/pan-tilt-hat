@@ -31,12 +31,13 @@ run_command('sudo python3 setup.py install')
 
 
 #install sunfounder_io
-print("install sunfounder_io")
+print("install sunfounder-io")
 os.chdir('/home/pi')
-if os.path.exists('/home/pi/sunfounder_io'):
-    run_command('sudo rm -r sunfounder_io/')
+if os.path.exists('/home/pi/sunfounder-io'):
+    os.chdir('/home/pi/sunfounder-io')
+    run_command('sudo rm -r sunfounder-io/')
 
 run_command('git clone https://github.com/sunfounder/sunfounder-io.git')
-os.chdir('/home/pi/sunfounder_io')
+os.chdir('/home/pi/sunfounder-io')
 run_command('sudo python3 setup.py install')
 
