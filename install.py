@@ -19,10 +19,11 @@ if os.path.exists('/home/pi/vilib'):
     # run_command('sudo rm -r vilib/')
     os.chdir('/home/pi/vilib')
     run_command('git pull')
-run_command('git clone https://github.com/sunfounder/vilib.git')
+else:
+    run_command('git clone https://github.com/sunfounder/vilib.git')
 os.chdir('/home/pi/vilib')
 run_command('sudo python3 setup.py install')
-
+ 
 
 # # install mediapipe-rpi3
 # print("install mediapipe-rpi3 ...")
@@ -31,11 +32,11 @@ run_command('sudo python3 setup.py install')
 
 #install sunfounder_io
 print("install sunfounder_io")
-os.chdir('~')
-if os.path.exists('~/sunfounder_io'):
+os.chdir('/home/pi')
+if os.path.exists('/home/pi/sunfounder_io'):
     run_command('sudo rm -r sunfounder_io/')
 
 run_command('git clone https://github.com/sunfounder/sunfounder-io.git')
-os.chdir('~/sunfounder_io')
+os.chdir('/home/pi/sunfounder_io')
 run_command('sudo python3 setup.py install')
 
