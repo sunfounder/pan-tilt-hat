@@ -16,18 +16,18 @@ def run_command(cmd=""):
 print("install vilib ...")
 os.chdir('/home/pi')
 if os.path.exists('/home/pi/vilib'):
-    # run_command('sudo rm -r vilib/')
+    # os.system('sudo rm -r vilib/')
     os.chdir('/home/pi/vilib')
-    run_command('git pull')
+    os.system('git pull')
 else:
-    run_command('git clone https://github.com/sunfounder/vilib.git')
+    os.system('git clone https://github.com/sunfounder/vilib.git')
 os.chdir('/home/pi/vilib')
-run_command('sudo python3 setup.py install')
+os.system('sudo python3 setup.py install')
  
 
 # # install mediapipe-rpi3
 # print("install mediapipe-rpi3 ...")
-# run_command('sudo pip3 install mediapipe-rpi3')
+# os.system('sudo pip3 install mediapipe-rpi3')
 
 
 #install sunfounder_io
@@ -35,9 +35,9 @@ print("install sunfounder-io")
 os.chdir('/home/pi')
 if os.path.exists('/home/pi/sunfounder-io'):
     os.chdir('/home/pi/sunfounder-io')
-    run_command('sudo rm -r sunfounder-io/')
+    os.system('sudo rm -r sunfounder-io/')
 
-run_command('git clone https://github.com/sunfounder/sunfounder-io.git')
+os.system('git clone https://github.com/sunfounder/sunfounder-io.git')
 os.chdir('/home/pi/sunfounder-io')
-run_command('sudo python3 setup.py install')
+os.system('sudo python3 setup.py install')
 
