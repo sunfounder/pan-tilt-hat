@@ -16,7 +16,9 @@ yVal = None
 panAngle = None
 tiltAngle = None
 
-Vilib.camera_start(True)
+
+Vilib.camera_start(inverted_flag=True)
+Vilib.display(local=True,web=True)
 Vilib.color_detect_switch(True)
 Vilib.detect_color_name('red')
 panAngle = 0
@@ -53,9 +55,5 @@ def forever():
         Servo(pwm_P1).angle(tiltAngle)
 
 if __name__ == "__main__":
-    # while True:
-    #     forever()  
-    pwm_P0 = PWM("P0")
-    pwm_P1 = PWM("P1")
-    Servo(pwm_P0).angle(20)
-    Servo(pwm_P1).angle(20)
+    while True:
+        forever()  
