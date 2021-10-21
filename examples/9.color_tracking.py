@@ -6,7 +6,10 @@ from vilib import Vilib
 # from ezblock import constrain
 # from ezblock import PWM
 # from ezblock import Servo
-from sunfounder_io import PWM,Servo
+from sunfounder_io import PWM,Servo,I2C
+
+# reset mcu
+I2C().reset_mcu()
 
 xVal = None
 yVal = None

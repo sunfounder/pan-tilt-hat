@@ -6,8 +6,11 @@ from vilib import Vilib
 # from ezblock import PWM
 # from ezblock import Servo
 # from ezblock import delay
-from sunfounder_io import PWM,Servo
+from sunfounder_io import PWM,Servo,I2C
 from time import sleep
+
+# reset mcu
+I2C().reset_mcu()
 
 Vilib.camera_start()
 Vilib.display()
