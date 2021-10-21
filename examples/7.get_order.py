@@ -6,7 +6,7 @@ from vilib import Vilib
 # from ezblock import PWM
 # from ezblock import Servo
 # from ezblock import delay
-from sunfunder_io import PWM,Servo
+from sunfounder_io import PWM,Servo
 from time import sleep
 
 Vilib.camera_start()
