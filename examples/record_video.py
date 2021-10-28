@@ -1,3 +1,4 @@
+
 from time import sleep,strftime,localtime
 from vilib import Vilib
 from sunfounder_io import PWM,Servo,I2C
@@ -23,7 +24,8 @@ Press keys on keyboard to record value!
     A: left
     S: right
     D: down
-    Q: take photo
+    Q: record/pause/continue
+    E: stop
 
     G: Quit
 '''
@@ -37,11 +39,40 @@ pan = Servo(PWM("P1"))
 tilt = Servo(PWM("P0"))
 panAngle = 0
 tiltAngle = 0
-
 pan.angle(0)
 tilt.angle(0)
 
+Vilib.rec_video_set["path"] = "/home/pi/video/"
+vname = strftime("%Y-%m-%d-%H.%M.%S", localtime())
+Vilib.rec_video_set["name"] = vname
+
+rec_flag = 'stop' # start,pause,stop
 # endregion init
+
+# rec control
+def rec_control(key):
+    global rec_flag
+    
+    if key == 'q' and rec_flag == 'stop':
+        key = None
+        rec_flag = 'start'
+        Vilib.rec_video_run()
+        print('rec start ...')
+    if key == 'q' and rec_flag == 'start':
+        key = None
+        rec_flag = 'pause'
+        Vilib.rec_video_pause()
+        print('pause')
+    if key == 'q' and rec_flag == 'pause':
+        key = None
+        rec_flag = 'start'
+        Vilib.rec_video_start()
+        print('continue')    
+
+    if key == 'e' and rec_flag != 'stop':
+        Vilib.rec_video_stop()
+        print('stop')
+        print("The video saved as %s%s.avi"%(Vilib.rec_video_set["path"],vname))  
 
 # region servo control
 def limit(x,min,max):
@@ -73,31 +104,25 @@ def servo_control(key):
 
 # endregion servo control
 
+
 def main():
 
     Vilib.camera_start(inverted_flag=True)
     Vilib.display(local=True,web=True)
 
-    i = 0
-    path = "/home/pi/picture/"
-  
     print(manual)
     while True:
         key = readchar()
+        # rec control
+        rec_control(key)
         # servo control
         servo_control(key)
-        # take photo
-        if key == 'q': 
-            i += 1 
-            Vilib.take_photo(photo_name=strftime("%Y-%m-%d-%H.%M.%S", localtime()),path=path)
-            print("take_photo: %s"%i)
         # esc
         if key == 'g':
             Vilib.camera_close()
             break 
 
-                
-
+        sleep(0.1)
 
 if __name__ == "__main__":
     main()

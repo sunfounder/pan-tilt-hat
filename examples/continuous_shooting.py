@@ -23,7 +23,7 @@ Press keys on keyboard to record value!
     A: left
     S: right
     D: down
-    Q: take photo
+    Q: continuous_shooting
 
     G: Quit
 '''
@@ -41,7 +41,7 @@ tiltAngle = 0
 pan.angle(0)
 tilt.angle(0)
 
-# endregion init
+#endregion init
 
 # region servo control
 def limit(x,min,max):
@@ -71,15 +71,21 @@ def servo_control(key):
         panAngle = limit(panAngle, -90, 90)
         pan.angle(panAngle)
 
-# endregion servo control
+# endregion
+
+# continuous shooting 
+def continuous_shooting(path,interval_ms:int=50,number=10):
+
+    for i in range(number):
+        Vilib.take_photo(photo_name='%03d'%i,path=path+'/'+strftime("%Y-%m-%d-%H.%M.%S", localtime()))
+    print("take_photo: %s"%i)
 
 def main():
 
     Vilib.camera_start(inverted_flag=True)
     Vilib.display(local=True,web=True)
 
-    i = 0
-    path = "/home/pi/picture/"
+    path = "/home/pi/picture/continuous_shooting"
   
     print(manual)
     while True:
@@ -88,15 +94,15 @@ def main():
         servo_control(key)
         # take photo
         if key == 'q': 
-            i += 1 
-            Vilib.take_photo(photo_name=strftime("%Y-%m-%d-%H.%M.%S", localtime()),path=path)
-            print("take_photo: %s"%i)
+            print("continuous_shooting .. ")
+            continuous_shooting(path,interval_ms=50,number=10)
+            print("continuous_shooting done ")
         # esc
         if key == 'g':
             Vilib.camera_close()
             break 
 
-                
+        sleep(0.1)
 
 
 if __name__ == "__main__":
