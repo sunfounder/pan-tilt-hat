@@ -37,9 +37,8 @@ pan = Servo(PWM("P1"))
 tilt = Servo(PWM("P0"))
 panAngle = 0
 tiltAngle = 0
-
-pan.angle(0)
-tilt.angle(0)
+pan.angle(panAngle)
+tilt.angle(tiltAngle)
 
 #endregion init
 
@@ -75,33 +74,30 @@ def servo_control(key):
 
 # continuous shooting 
 def continuous_shooting(path,interval_ms:int=50,number=10):
-
+    print("continuous_shooting .. ")
+    path=path+'/'+strftime("%Y-%m-%d-%H.%M.%S", localtime())
     for i in range(number):
-        Vilib.take_photo(photo_name='%03d'%i,path=path+'/'+strftime("%Y-%m-%d-%H.%M.%S", localtime()))
-    print("take_photo: %s"%i)
+        Vilib.take_photo(photo_name='%03d'%i,path=path)
+        print("take_photo: %s"%i)
+        sleep(interval_ms/1000)
+    print("continuous_shooting done ")
 
 def main():
 
-    Vilib.camera_start(inverted_flag=True)
+    Vilib.camera_start(vflip=True,hflip=True) 
     Vilib.display(local=True,web=True)
 
-    path = "/home/pi/picture/continuous_shooting"
+    path = "/home/pi/Pictures/continuous_shooting"
   
     print(manual)
     while True:
         key = readchar()
-        # servo control
         servo_control(key)
-        # take photo
         if key == 'q': 
-            print("continuous_shooting .. ")
             continuous_shooting(path,interval_ms=50,number=10)
-            print("continuous_shooting done ")
-        # esc
         if key == 'g':
             Vilib.camera_close()
             break 
-
         sleep(0.1)
 
 

@@ -42,7 +42,7 @@ tiltAngle = 0
 pan.angle(0)
 tilt.angle(0)
 
-Vilib.rec_video_set["path"] = "/home/pi/video/"
+Vilib.rec_video_set["path"] = "/home/pi/Pictures/"
 vname = strftime("%Y-%m-%d-%H.%M.%S", localtime())
 Vilib.rec_video_set["name"] = vname
 
@@ -107,7 +107,7 @@ def servo_control(key):
 
 def main():
 
-    Vilib.camera_start(inverted_flag=True)
+    Vilib.camera_start(vflip=True,hflip=True) 
     Vilib.display(local=True,web=True)
 
     print(manual)

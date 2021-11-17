@@ -21,12 +21,7 @@ def readchar():
 
 manual = '''
 Press keys on keyboard to record value!
-    W: up
-    A: left
-    S: right
-    D: down
     Q: take photo
-
     G: Quit
 '''
 # endregion
@@ -39,27 +34,23 @@ def check_dir(dir):
         except Exception as e:
             print(e)
 
+# region init
 I2C().reset_mcu()
 sleep(0.01)
 
 pan = Servo(PWM("P1"))
 tilt = Servo(PWM("P0"))
-pan.angle(0)
-tilt.angle(0)
 panAngle = 0
 tiltAngle = 0
+pan.angle(panAngle)
+tilt.angle(tiltAngle )
+# endregion
 
-'''
-    https://docs.opencv.org/3.4.15/d2/d8d/classcv_1_1Stitcher.html
-    https://github.com/opencv/opencv/blob/4.2.0/samples/python/stitching.py
-    https://github.com/opencv/opencv/blob/4.2.0/samples/python/stitching_detailed.py
-
-'''
 Status_info = {
-  0: 'OK',
-  1: 'ERR_NEED_MORE_IMGS',
-  2: 'ERR_HOMOGRAPHY_EST_FAIL',
-  3: 'ERR_CAMERA_PARAMS_ADJUST_FAIL',
+    0: 'OK',
+    1: 'ERR_NEED_MORE_IMGS',
+    2: 'ERR_HOMOGRAPHY_EST_FAIL',
+    3: 'ERR_CAMERA_PARAMS_ADJUST_FAIL',
 }
 
 def panorama_shooting(path):
@@ -71,18 +62,14 @@ def panorama_shooting(path):
     # check path
     check_dir(path)
 
-    # stitcher = cv2.createStitcher(cv2.Stitcher_SCANS)
-    stitcher = cv2.Stitcher_create(cv2.Stitcher_SCANS)
-    
-    # tilt.angle(0)
-    # panAngle  = -90
-    for a in range(panAngle,-91,-5):
+    # take photo    
+    for a in range(panAngle,-81,-5):
         panAngle = a
         pan.angle(panAngle)
         sleep(0.1)
-    # take photo
+
     num = 0
-    for angle in range(-80,80,20):
+    for angle in range(-80,81,20):
         for a in range(panAngle,angle,1):
             panAngle = a
             pan.angle(a)
@@ -95,9 +82,10 @@ def panorama_shooting(path):
         num += 1
 
     # stitch image 
+    stitcher = cv2.Stitcher_create(cv2.Stitcher_SCANS)
+
     for index in range(num):
         imgs.append(cv2.imread('%s/%s.jpg'%(temp_path,index)))
-        cv2.imshow('test',imgs[index])
     print('imgs num: %s'%len(imgs))
 
     status,pano = stitcher.stitch(imgs)
@@ -108,21 +96,19 @@ def panorama_shooting(path):
         cv2.imwrite('%s/%s.jpg'%(path,strftime("%Y-%m-%d-%H.%M.%S", localtime())),pano)
         cv2.imshow('panorama',pano)
 
-
-    # clear temp
-    # os.removedirs(temp_path)
     os.system('sudo rm -r %s'%temp_path)
 
 # main
 
 def main():
 
-    Vilib.camera_start(inverted_flag=True)
-    Vilib.display(local=True,web=False)
-
-    path = "/home/pi/picture/panorama"
-  
     print(manual)
+
+    Vilib.camera_start(vflip=True,hflip=True)
+    Vilib.display(local=True,web=True)
+    sleep(0.1)
+
+    path = "/home/pi/Pictures/panorama"
     while True:
         key = readchar()
         # take photo

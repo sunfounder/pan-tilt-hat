@@ -9,6 +9,7 @@ import os
 import sys
 import tty
 import termios
+import threading
 
 # region  read keyboard 
 def readchar():
@@ -27,8 +28,8 @@ Press keys on keyboard to record value!
     A: left
     S: right
     D: down
-    Q: start/stop Time-lapse photography 
-
+    Q: start Time-lapse photography 
+    E: stop
     G: Quit
 '''
 # endregion
@@ -41,14 +42,8 @@ pan = Servo(PWM("P1"))
 tilt = Servo(PWM("P0"))
 panAngle = 0
 tiltAngle = 0
-
-pan.angle(0)
-tilt.angle(0)
-
-vflip = True  # -vf
-hflip = False # -hf
-output = "/home/pi/picture/time_lapse" # -o
-timelapse = 3000    # -tl  /ms
+pan.angle(panAngle)
+tilt.angle(tiltAngle)
 
 # endregion
 
@@ -92,6 +87,9 @@ def servo_control(key):
 
 # Video synthesis
 def video_synthesis(name:str,input:str,output:str,fps=30,format='.jpg',datetime=False):
+
+    print('processing video, please wait ....')
+
     # video parameter
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     out = cv2.VideoWriter(output+'/'+name, fourcc, fps, (640,480))
@@ -99,25 +97,28 @@ def video_synthesis(name:str,input:str,output:str,fps=30,format='.jpg',datetime=
     height = 480
 
     # traverse
+   
     for root, dirs, files in os.walk(input):
+        print('%s pictures be processed'%len(files))
+        files = sorted(files)
         for file in files:
-            print('Format:',os.path.splitext(file)[1])
-            if os.path.splitext(file)[1] == '.'+ format:
+            # print('Format:',os.path.splitext(file)[1])
+            if os.path.splitext(file)[1] == format:
                 # imread
-                frame = cv2.imread(input+file)
+                frame = cv2.imread(input+'/'+file)
                 # add datetime watermark
                 if datetime == True:
-                    print('name:',os.path.splitext(file)[1])
+                    # print('name:',os.path.splitext(file)[1])
                     time = os.path.splitext(file)[0].split('-')
                     year = time[0]
-                    month = time[0]
-                    day = time[0]
-                    hour = time[0]
-                    minute = time[0]
-                    second = time[0]
+                    month = time[1]
+                    day = time[2]
+                    hour = time[3]
+                    minute = time[4]
+                    second = time[5]
                     frame = cv2.putText(frame, 
                                         '%s.%s.%s %s:%s:%s'%(year,month,day,hour,minute,second),
-                                        (width - 120, height - 25), 
+                                        (width - 180, height - 25), 
                                         cv2.FONT_HERSHEY_SIMPLEX, 0.5,
                                         (255, 255, 255),
                                         1, 
@@ -128,54 +129,80 @@ def video_synthesis(name:str,input:str,output:str,fps=30,format='.jpg',datetime=
     # release the VideoWriter object
     out.release()
 
-    
+    # remove photos
+    os.system('sudo rm -r %s'%input)
+    print('Done.The video save as %s/%s'%(output,name))
+
+# keyboard scan thread
+key = None
+breakout_flag=False
+def keyboard_scan():
+    global key
+    while True:
+        key = None
+        key = readchar()
+        sleep(0.01)
+        if breakout_flag==True:
+            break
+        
+# continuous_shooting
+def continuous_shooting(path,interval_ms:int=3000):
+    print('Start time-lapse photography, press the "e" key to stop')   
+
+    delay = 10 # ms
+
+    count = 0
+    while True:    
+        if count == interval_ms/delay:
+            count = 0
+            Vilib.take_photo(photo_name=strftime("%Y-%m-%d-%H-%M-%S", localtime()),path=path)
+        if key == 'e':
+            break
+        count += 1
+        sleep(delay/1000) # second
+
+
 # main
 def main():
 
-    Vilib.camera_start(inverted_flag=True)
-    Vilib.display(local=True,web=True)
-  
     print(manual)
+
+    Vilib.camera_start(vflip=True,hflip=True)
+    Vilib.display(local=True,web=True)
+
+    sleep(1)
+    t = threading.Thread(target=keyboard_scan)
+    t.setDaemon(True)
+    t.start()
+    
+    
     while True:
-        key = readchar()
-        # servo control
-        # servo_control(key)
+        servo_control(key)
+
         # time-lapse photography
         if key == 'q':
+
+            #check path
+            output = "/home/pi/Pictures/time_lapse" # -o
             input = output+'/'+strftime("%Y-%m-%d-%H-%M-%S", localtime())
             check_dir(input)
             check_dir(output)
 
-            #  take_photo
-            count = 0
-            delay = 100 # ms
-            print('start time-lapse photography, press the "q" key to stop')
-            Vilib.take_photo(photo_name=strftime("%Y-%m-%d-%H-%M-%S", localtime()),path=input)        
-            while True:
-                print('count:%s'%count)
-                if count == timelapse/delay:
-                    count = 0
-                    Vilib.take_photo(photo_name=strftime("%Y-%m-%d-%H-%M-%S", localtime()),path=input)
-                
-                key = readchar()
-                if key == 'q':
-                    break
-
-                count += 1
-                sleep(delay/1000) # second
+            # take_photo
+            continuous_shooting(input,interval_ms=3000)
+            
             # video_synthesis
-            print('processing video, please wait ....')
-            video_synthesis(name=strftime("%Y-%m-%d-%H-%M-%S", localtime()),
-                            input=input,output=output,fps=30,format='.jpg',datetime=True)
-            # remove photos
-            os.removedirs(input)
-            print('Done.The video save as %s'%output)
-
+            name=strftime("%Y-%m-%d-%H-%M-%S", localtime())+'.avi'
+            video_synthesis(name=name,input=input,output=output,fps=30,format='.jpg',datetime=True)
+            
         # esc
         if key == 'g':
             Vilib.camera_close()
+            global breakout_flag
+            breakout_flag=True
+            sleep(0.1)
+            print('The program ends, please press CTRL+C to exit.')
             break 
-    
         sleep(0.01)
 
 if __name__ == "__main__":
