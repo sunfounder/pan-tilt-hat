@@ -36,14 +36,7 @@ git clone https://github.com/sunfounder/pan-tilt-hat.git
 
 ## Usage
 
-Before running the example, stop ezblock sercive
-
-```python
-sudo service ezblock stop
-```
-
-Then run the example
-
+Run the example
 ```bash
 cd examples
 sudo python3 xxx.py
@@ -55,7 +48,7 @@ Stop running the example by using <kbd>Ctrl</kbd>+<kbd>C</kbd>
 
 Click this link to view the real-time dynamics of the Raspberry Pi camera
 
-http://192.168.18.120:9000/mjpg
+http://localhost:9000/mjpg
 
 Note to replace it with the IP address of your own Raspberry Pi
 
@@ -76,7 +69,7 @@ sudo python3 xxx.py
 
 ## Update
 
-- 2020-6-12: New Release
+- 
 
 ## Trouble Shootings
 
