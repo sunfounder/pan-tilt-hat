@@ -1,45 +1,30 @@
+#!/usr/bin/env python3
 from time import sleep,strftime,localtime
 from vilib import Vilib
-from sunfounder_io import PWM,Servo,I2C
-
 import sys
-import tty
-import termios
+sys.path.append('./')
+from servo import Servo
+import readchar
 
-# region  read keyboard 
-def readchar():
-    fd = sys.stdin.fileno()
-    old_settings = termios.tcgetattr(fd)
-    try:
-        tty.setraw(sys.stdin.fileno())
-        ch = sys.stdin.read(1)
-    finally:
-        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-    return ch
 
 manual = '''
 Press keys on keyboard to record value!
     W: up
     A: left
-    S: right
-    D: down
+    S: down
+    D: right
     Q: continuous_shooting
 
     G: Quit
 '''
-# endregion
 
-# region init
-I2C().reset_mcu()
-sleep(0.01)
-
-pan = Servo(PWM("P1"))
-tilt = Servo(PWM("P0"))
+# region servos init
+pan = Servo(pin=13, min_angle=-90, max_angle=90) # pan_servo_pin (BCM)
+tilt = Servo(pin=12, min_angle=-90, max_angle=30) # be careful to limit the angle of the steering gear
 panAngle = 0
 tiltAngle = 0
-pan.angle(panAngle)
-tilt.angle(tiltAngle)
-
+pan.set_angle(panAngle)
+tilt.set_angle(tiltAngle)
 #endregion init
 
 # region servo control
@@ -55,20 +40,20 @@ def servo_control(key):
     global panAngle,tiltAngle       
     if key == 'w':
         tiltAngle -= 1
-        tiltAngle = limit(tiltAngle, -90, 90)
-        tilt.angle(tiltAngle)
+        tiltAngle = limit(tiltAngle, -90, 30)
+        tilt.set_angle(tiltAngle)
     if key == 's':
         tiltAngle += 1
-        tiltAngle = limit(tiltAngle, -90, 90)
-        tilt.angle(tiltAngle)
+        tiltAngle = limit(tiltAngle, -90, 30)
+        tilt.set_angle(tiltAngle)
     if key == 'a':
         panAngle += 1
         panAngle = limit(panAngle, -90, 90)
-        pan.angle(panAngle)
+        pan.set_angle(panAngle)
     if key == 'd':
         panAngle -= 1
         panAngle = limit(panAngle, -90, 90)
-        pan.angle(panAngle)
+        pan.set_angle(panAngle)
 
 # endregion
 
@@ -80,26 +65,29 @@ def continuous_shooting(path,interval_ms:int=50,number=10):
         Vilib.take_photo(photo_name='%03d'%i,path=path)
         print("take_photo: %s"%i)
         sleep(interval_ms/1000)
-    print("continuous_shooting done ")
+    print("continuous_shooting done,the pictures save as %s"%path)
+    sleep(0.2)
 
 def main():
 
     Vilib.camera_start(vflip=True,hflip=True) 
     Vilib.display(local=True,web=True)
 
-    path = "/home/pi/Pictures/continuous_shooting"
+    path = "/home/pi/Pictures/vilib/continuous_shooting"
   
     print(manual)
     while True:
-        key = readchar()
+        key = readchar.readkey().lower()
         servo_control(key)
         if key == 'q': 
             continuous_shooting(path,interval_ms=50,number=10)
-        if key == 'g':
+        elif key == 'g':
             Vilib.camera_close()
             break 
-        sleep(0.1)
+        sleep(0.01)
 
 
 if __name__ == "__main__":
     main()
+
+    

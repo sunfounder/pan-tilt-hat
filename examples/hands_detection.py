@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from vilib import Vilib
 from time import sleep
 
@@ -17,3 +18,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+    

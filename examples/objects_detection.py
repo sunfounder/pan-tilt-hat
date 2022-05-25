@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from vilib import Vilib
 
 def main():
@@ -9,3 +10,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+    

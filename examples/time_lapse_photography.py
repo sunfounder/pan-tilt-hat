@@ -1,17 +1,19 @@
+#!/usr/bin/env python3
 '''
     Time-lapse photography based on the Raspistill command
 '''
-from time import perf_counter, sleep,strftime,localtime
+from time import time, sleep, strftime, localtime
 from vilib import Vilib
-from sunfounder_io import PWM,Servo,I2C
-import cv2
 import os
 import sys
+sys.path.append('./')
+from servo import Servo
+# import readchar
+import cv2
+import threading
 import tty
 import termios
-import threading
 
-# region  read keyboard 
 def readchar():
     fd = sys.stdin.fileno()
     old_settings = termios.tcgetattr(fd)
@@ -21,6 +23,8 @@ def readchar():
     finally:
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
     return ch
+    
+
 
 manual = '''
 Press keys on keyboard to record value!
@@ -34,18 +38,15 @@ Press keys on keyboard to record value!
 '''
 # endregion
 
-# region init
-I2C().reset_mcu()
-sleep(0.01)
-
-pan = Servo(PWM("P1"))
-tilt = Servo(PWM("P0"))
+# region servos init
+pan = Servo(pin=13, min_angle=-90, max_angle=90) # pan_servo_pin (BCM)
+tilt = Servo(pin=12, min_angle=-90, max_angle=30) # be careful to limit the angle of the steering gear
 panAngle = 0
 tiltAngle = 0
-pan.angle(panAngle)
-tilt.angle(tiltAngle)
+pan.set_angle(panAngle)
+tilt.set_angle(tiltAngle)
 
-# endregion
+#endregion init
 
 # # check dir 
 def check_dir(dir):
@@ -68,44 +69,44 @@ def servo_control(key):
     global panAngle,tiltAngle       
     if key == 'w':
         tiltAngle -= 1
-        tiltAngle = limit(tiltAngle, -90, 90)
-        tilt.angle(tiltAngle)
+        tiltAngle = limit(tiltAngle, -90, 30)
+        tilt.set_angle(tiltAngle)
     if key == 's':
         tiltAngle += 1
-        tiltAngle = limit(tiltAngle, -90, 90)
-        tilt.angle(tiltAngle)
+        tiltAngle = limit(tiltAngle, -90, 30)
+        tilt.set_angle(tiltAngle)
     if key == 'a':
         panAngle += 1
         panAngle = limit(panAngle, -90, 90)
-        pan.angle(panAngle)
+        pan.set_angle(panAngle)
     if key == 'd':
         panAngle -= 1
         panAngle = limit(panAngle, -90, 90)
-        pan.angle(panAngle)
+        pan.set_angle(panAngle)
 
 # endregion servo control
 
 # Video synthesis
-def video_synthesis(name:str,input:str,output:str,fps=30,format='.jpg',datetime=False):
+def video_synthesis(name:str,output:str,path:str,fps=30,format='.jpg',datetime=False):
 
-    print('processing video, please wait ....')
+    print('\nprocessing video, please wait ....')
 
     # video parameter
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    out = cv2.VideoWriter(output+'/'+name, fourcc, fps, (640,480))
+    out = cv2.VideoWriter(path+'/'+name+'.avi', fourcc, fps, (640,480))
     width = 640
     height = 480
 
     # traverse
    
-    for root, dirs, files in os.walk(input):
-        print('%s pictures be processed'%len(files))
+    for root, dirs, files in os.walk(output):
+        print('%s pictures need to be processed ...'%len(files))
         files = sorted(files)
         for file in files:
             # print('Format:',os.path.splitext(file)[1])
             if os.path.splitext(file)[1] == format:
                 # imread
-                frame = cv2.imread(input+'/'+file)
+                frame = cv2.imread(output+'/'+file)
                 # add datetime watermark
                 if datetime == True:
                     # print('name:',os.path.splitext(file)[1])
@@ -128,10 +129,9 @@ def video_synthesis(name:str,input:str,output:str,fps=30,format='.jpg',datetime=
 
     # release the VideoWriter object
     out.release()
-
-    # remove photos
-    os.system('sudo rm -r %s'%input)
-    print('Done.The video save as %s/%s'%(output,name))
+    # remove photos cache
+    os.system('sudo rm -r %s'%output)
+    print('\nDone.The video save as %s/%s'%(path,name))
 
 # keyboard scan thread
 key = None
@@ -140,61 +140,64 @@ def keyboard_scan():
     global key
     while True:
         key = None
-        key = readchar()
+        key = readchar().lower()
         sleep(0.01)
         if breakout_flag==True:
             break
         
 # continuous_shooting
-def continuous_shooting(path,interval_ms:int=3000):
-    print('Start time-lapse photography, press the "e" key to stop')   
+def continuous_shooting(path, interval_s=3, duration_s=3600):
+    print('\nStart time-lapse photography, press the "e" key to stop')   
 
-    delay = 10 # ms
+    start_time = time()
+    node_time = start_time
 
-    count = 0
-    while True:    
-        if count == interval_ms/delay:
-            count = 0
+    while True: 
+          
+        if time()-node_time > interval_s:
+            node_time = time()
             Vilib.take_photo(photo_name=strftime("%Y-%m-%d-%H-%M-%S", localtime()),path=path)
-        if key == 'e':
+        if key == 'e' or time()-start_time > duration_s:
             break
-        count += 1
-        sleep(delay/1000) # second
+        sleep(0.01) # second
 
 
 # main
 def main():
-
-    print(manual)
-
+    global key
+    
+    
     Vilib.camera_start(vflip=True,hflip=True)
     Vilib.display(local=True,web=True)
 
-    sleep(1)
+    sleep(2)
+    print(manual)
+    sleep(0.2)
     t = threading.Thread(target=keyboard_scan)
     t.setDaemon(True)
     t.start()
     
-    
+    path = "/home/pi/Videos/vilib/time_lapse"
+    check_dir(path)
+
     while True:
         servo_control(key)
 
         # time-lapse photography
         if key == 'q':
-
-            #check path
-            output = "/home/pi/Pictures/time_lapse" # -o
-            input = output+'/'+strftime("%Y-%m-%d-%H-%M-%S", localtime())
-            check_dir(input)
+            # check path
+            output = path+'/'+strftime("%Y-%m-%d-%H-%M-%S", localtime())
             check_dir(output)
-
-            # take_photo
-            continuous_shooting(input,interval_ms=3000)
-            
+            # take a picture every 3 seconds for 3600 seconds
+            continuous_shooting(output, interval_s=3, duration_s=3600)
             # video_synthesis
-            name=strftime("%Y-%m-%d-%H-%M-%S", localtime())+'.avi'
-            video_synthesis(name=name,input=input,output=output,fps=30,format='.jpg',datetime=True)
-            
+            name=strftime("%Y-%m-%d-%H-%M-%S", localtime())
+            video_synthesis(name=name,
+                            output=output,
+                            path=path,
+                            fps=30,
+                            format='.jpg',
+                            datetime=True)       
         # esc
         if key == 'g':
             Vilib.camera_close()
@@ -207,3 +210,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+    

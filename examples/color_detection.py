@@ -1,10 +1,12 @@
+#!/usr/bin/env python3
 from vilib import Vilib
+import time
 
-flag_color = False
+color_flag = 'close'
+color_list = ['close', 'red','orange','yellow','green','blue','purple']
 
 manual = '''
 Input key to call the function!
-    q: Take photo
     1: Color detect : red
     2: Color detect : orange
     3: Color detect : yellow
@@ -12,51 +14,61 @@ Input key to call the function!
     5: Color detect : blue
     6: Color detect : purple
     0: Switch off Color detect
-    s: Display detected object information
+
+    S: Display detected object information
+    Q: Photo shoot
+    G: Quit
 '''
 
 def color_detect(color):
-    print("detecting color :" + color)
-    Vilib.color_detect(color)
+    if color == 'close':
+        print("Color detect off!")
+        Vilib.color_detect_switch(False)
+    else:
+        print("detecting color :" + color)
+        Vilib.color_detect(color)
+
 
 def show_info():
-    if flag_color is True and Vilib.detect_obj_parameter['color_n']!=0:
-        color_coodinate = (Vilib.detect_obj_parameter['color_x'],Vilib.detect_obj_parameter['color_y'])
-        color_size = (Vilib.detect_obj_parameter['color_w'],Vilib.detect_obj_parameter['color_h'])
-        print("Coordinate:",color_coodinate,"Size",color_size)
+    if color_flag == 'close':
+        print("Color detection is turned off !")
+    else:
+        if Vilib.detect_obj_parameter['color_n']!=0:
+            color_coodinate = (Vilib.detect_obj_parameter['color_x'],Vilib.detect_obj_parameter['color_y'])
+            color_size = (Vilib.detect_obj_parameter['color_w'],Vilib.detect_obj_parameter['color_h'])
+            print("Coordinate:",color_coodinate,"Size",color_size)
+        else:
+            print("No %s detected!"%color_flag)
+
 
 def main():
+    global color_flag
+    path = "/home/pi/Pictures/vilib/color_detection/"
+
     Vilib.camera_start(vflip=True,hflip=True) 
     Vilib.display(local=True,web=True)
+    time.sleep(2)
+    
     print(manual)
-
-    global flag_color
-
     while True:
-        key = input()  
-        if key == "1":
-            color_detect("red")
-            flag_color = True
-        elif key == "2":
-            color_detect("orange")
-            flag_color = True
-        elif key == "3":
-            color_detect("yellow")
-            flag_color = True
-        elif key == "4":
-            color_detect("green")
-            flag_color = True
-        elif key == "5":
-            color_detect("blue")
-            flag_color = True
-        elif key == "6":
-            color_detect("purple")
-            flag_color = True
-        elif key =="0":
-            Vilib.color_detect_switch(False)
-            flag_color = False
-        elif key == "s":
-            show_info()
+        try:
+            key = input().lower()
+            if key in ['0', '1', '2', '3', '4', '5', '6']:
+                color_flag = color_list[int(key)]
+                color_detect(color_flag)
+            elif key == "s":
+                show_info()
+            elif key == 'q':
+                _time = time.strftime("%y-%m-%d_%H-%M-%S", time.localtime())
+                Vilib.take_photo(photo_name=str(_time),path=path)
+                print("The photo save as %s%s.jpg"%(path,_time))
+            elif key == "g" :
+                Vilib.camera_close()
+                break 
+        except KeyboardInterrupt:
+            Vilib.camera_close()
+            break
+
 
 if __name__ == "__main__":
     main()
