@@ -31,18 +31,21 @@ Pan-Tilt HAT is a 2-axis Pan-Tilt kit for intelligent detection and free movemen
 Download this repository to your Raspberry Pi:
 
 ```shell
+cd ~
 git clone https://github.com/sunfounder/pan-tilt-hat.git
+cd ~/pan-tilt-hat
+sudo python3 install_dependencies.py
 ```
-
 ## Usage
 
 Run the example
 ```bash
-cd examples
+cd ~/pan-tilt-hat/examples
 sudo python3 xxx.py
 ```
-
 Stop running the example by using <kbd>Ctrl</kbd>+<kbd>C</kbd>
+
+More to see: https://docs.sunfounder.com/projects/pan-tilt-hat/en/latest/index.html
 
 ## Camera
 
