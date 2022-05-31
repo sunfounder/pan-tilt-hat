@@ -4,7 +4,19 @@ from vilib import Vilib
 import sys
 sys.path.append('./')
 from servo import Servo
-import readchar
+import tty
+import termios
+
+def readchar():
+    fd = sys.stdin.fileno()
+    old_settings = termios.tcgetattr(fd)
+    try:
+        tty.setraw(sys.stdin.fileno())
+        ch = sys.stdin.read(1)
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+    return ch
+
 
 
 manual = '''
@@ -77,7 +89,7 @@ def main():
   
     print(manual)
     while True:
-        key = readchar.readkey().lower()
+        key = readchar().lower()
         servo_control(key)
         if key == 'q': 
             continuous_shooting(path,interval_ms=50,number=10)
