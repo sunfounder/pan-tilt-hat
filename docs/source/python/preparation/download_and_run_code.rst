@@ -40,7 +40,7 @@ To make sure you can see that the servo has been set to 0°, you can insert a ro
 .. image:: media/servo_arm.png
     :align: center
 
-Now follow the diagram below and insert the servo to the P0/P1 position.
+Now follow the diagram below and insert the servo to the 12/13 position.
 
 
 .. image:: media/sp211112_112507.png
