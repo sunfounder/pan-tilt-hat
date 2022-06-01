@@ -61,8 +61,8 @@ Then you can enter ``http://<your IP>:9000/mjpg`` in the browser to view the vid
 
             sleep(1)
 
-if __name__ == "__main__":
-    main()
+    if __name__ == "__main__":
+        main()
 
 
 

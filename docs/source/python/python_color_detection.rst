@@ -94,7 +94,6 @@ Please follow the prompts to activate the corresponding functions.
         5: Color detect : blue
         6: Color detect : purple
         0: Switch off Color detect
-        
         S: Display detected object information
         Q: Photo shoot
         G: Quit
@@ -152,7 +151,6 @@ Please follow the prompts to activate the corresponding functions.
 
     if __name__ == "__main__":
         main()
-
 
 
 

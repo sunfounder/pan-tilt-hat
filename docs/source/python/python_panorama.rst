@@ -44,13 +44,15 @@ Then you can enter ``http://<your IP>:9000/mjpg`` in the browser to view the vid
 
 .. code-block:: python
 
-    from time import perf_counter, sleep,strftime,localtime
+    #!/usr/bin/env python3
+    from time import sleep,strftime,localtime
     from vilib import Vilib
-    from sunfounder_io import PWM,Servo,I2C
+    import sys
+    sys.path.append('./')
+    from servo import Servo
     import cv2
     import os
 
-    import sys
     import tty
     import termios
 
@@ -67,7 +69,7 @@ Then you can enter ``http://<your IP>:9000/mjpg`` in the browser to view the vid
 
     manual = '''
     Press keys on keyboard to record value!
-        Q: take photo
+        Q: take panoramic photo
         G: Quit
     '''
     # endregion
@@ -81,15 +83,12 @@ Then you can enter ``http://<your IP>:9000/mjpg`` in the browser to view the vid
                 print(e)
 
     # region init
-    I2C().reset_mcu()
-    sleep(0.01)
-
-    pan = Servo(PWM("P1"))
-    tilt = Servo(PWM("P0"))
+    pan = Servo(pin=13, min_angle=-90, max_angle=90) # pan_servo_pin (BCM)
+    tilt = Servo(pin=12, min_angle=-90, max_angle=30) # be careful to limit the angle of the steering gear
     panAngle = 0
     tiltAngle = 0
-    pan.angle(panAngle)
-    tilt.angle(tiltAngle )
+    pan.set_angle(panAngle)
+    tilt.set_angle(tiltAngle)
     # endregion
 
     Status_info = {
@@ -102,23 +101,24 @@ Then you can enter ``http://<your IP>:9000/mjpg`` in the browser to view the vid
     def panorama_shooting(path):
         global panAngle,tiltAngle
 
-        temp_path = "/home/pi/picture/.temp/panorama"
+        temp_path = "/home/pi/Pictures/vilib/panorama/.temp/"
         imgs =[]
 
         # check path
         check_dir(path)
+        check_dir(temp_path)
 
         # take photo    
         for a in range(panAngle,-81,-5):
             panAngle = a
-            pan.angle(panAngle)
+            pan.set_angle(panAngle)
             sleep(0.1)
 
         num = 0
         for angle in range(-80,81,20):
             for a in range(panAngle,angle,1):
                 panAngle = a
-                pan.angle(a)
+                pan.set_angle(a)
                 sleep(0.1)
             sleep(0.5)
             # sleep(0.5)
@@ -132,7 +132,7 @@ Then you can enter ``http://<your IP>:9000/mjpg`` in the browser to view the vid
 
         for index in range(num):
             imgs.append(cv2.imread('%s/%s.jpg'%(temp_path,index)))
-        print('imgs num: %s'%len(imgs))
+        print('imgs num: %s, '%len(imgs))
 
         status,pano = stitcher.stitch(imgs)
 
@@ -142,26 +142,24 @@ Then you can enter ``http://<your IP>:9000/mjpg`` in the browser to view the vid
             cv2.imwrite('%s/%s.jpg'%(path,strftime("%Y-%m-%d-%H.%M.%S", localtime())),pano)
             cv2.imshow('panorama',pano)
 
+        # remove cache
         os.system('sudo rm -r %s'%temp_path)
 
     # main
 
     def main():
-
-        print(manual)
-
+        path = "/home/pi/Pictures/vilib/panorama"
         Vilib.camera_start(vflip=True,hflip=True)
         Vilib.display(local=True,web=True)
-        sleep(0.1)
+        sleep(2)
 
-        path = "/home/pi/Pictures/panorama"
+        print(manual)
         while True:
             key = readchar()
             # take photo
             if key == 'q': 
                 print("panorama shooting ...")
                 panorama_shooting(path)
-
             # esc
             if key == 'g':
                 print('Quit')
@@ -178,30 +176,30 @@ Then you can enter ``http://<your IP>:9000/mjpg`` in the browser to view the vid
 
 The core functions of this example are placed in the ``panorama_shooting(path)`` function. This function includes the following parts:
 
-1. Path management: that is, ``checkdir()`` , I won't repeat it.
+1. Path management: that is, ``checkdir()``.
 
 2. Photograph:
 
     .. code-block:: python
 
-            # take photo    
-            for a in range(panAngle,-81,-5):
-                panAngle = a
-                pan.angle(panAngle)
-                sleep(0.1)
+        # take photo    
+        for a in range(panAngle,-81,-5):
+            panAngle = a
+            pan.set_angle(panAngle)
+            sleep(0.1)
 
-            num = 0
-            for angle in range(-80,81,20):
-                for a in range(panAngle,angle,1):
-                    panAngle = a
-                    pan.angle(a)
-                    sleep(0.1)
-                sleep(0.5)
-                
-                print(num,angle)
-                Vilib.take_photo(photo_name='%s'%num,path=temp_path)
-                sleep(0.2)
-                num += 1
+        num = 0
+        for angle in range(-80,81,20):
+            for a in range(panAngle,angle,1):
+                panAngle = a
+                pan.set_angle(a)
+                sleep(0.1)
+            sleep(0.5)
+            # sleep(0.5)
+            print(num,angle)
+            Vilib.take_photo(photo_name='%s'%num,path=temp_path)
+            sleep(0.2)
+            num += 1
 
     Here, the two functions of taking pictures and steering gear control are put together. The pan servo starts to deflection slowly counterclockwise from the -80° position, and takes a picture every 20° deflection, until the 80° position ends. After execution, you will get 9 temporary photos, which are stored in the path ``temp_path``.
 

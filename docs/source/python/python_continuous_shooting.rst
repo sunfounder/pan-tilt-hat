@@ -51,7 +51,19 @@ Then you can enter ``http://<your IP>:9000/mjpg`` in the browser to view the vid
     import sys
     sys.path.append('./')
     from servo import Servo
-    import readchar
+    import tty
+    import termios
+
+    def readchar():
+        fd = sys.stdin.fileno()
+        old_settings = termios.tcgetattr(fd)
+        try:
+            tty.setraw(sys.stdin.fileno())
+            ch = sys.stdin.read(1)
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+        return ch
+
 
 
     manual = '''
@@ -123,7 +135,7 @@ Then you can enter ``http://<your IP>:9000/mjpg`` in the browser to view the vid
     
         print(manual)
         while True:
-            key = readchar.readkey().lower()
+            key = readchar().lower()
             servo_control(key)
             if key == 'q': 
                 continuous_shooting(path,interval_ms=50,number=10)
@@ -153,7 +165,6 @@ The code in this article looks slightly complicated, we can split it into three 
         import tty
         import termios
 
-        # region  read keyboard 
         def readchar():
             fd = sys.stdin.fileno()
             old_settings = termios.tcgetattr(fd)
@@ -163,11 +174,10 @@ The code in this article looks slightly complicated, we can split it into three 
             finally:
                 termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
             return ch
-        # endregion
 
         def main():
             while True:
-                key = readchar()
+                key = readchar().lower()
                 sleep(0.1)
 
         if __name__ == "__main__":
@@ -182,21 +192,19 @@ The code in this article looks slightly complicated, we can split it into three 
    
     .. code-block:: python
 
-        from time import sleep
-        from sunfounder_io import PWM,Servo,I2C
+        from time import sleep,strftime,localtime
+        from servo import Servo
 
         ### The readchar part is omitted here ###
 
-        # region init
-        I2C().reset_mcu()
-        sleep(0.01)
-
-        pan = Servo(PWM("P1"))
-        tilt = Servo(PWM("P0"))
+ 
+        # region servos init
+        pan = Servo(pin=13, min_angle=-90, max_angle=90) # pan_servo_pin (BCM)
+        tilt = Servo(pin=12, min_angle=-90, max_angle=30) # be careful to limit the angle of the steering gear
         panAngle = 0
         tiltAngle = 0
-        pan.angle(panAngle)
-        tilt.angle(tiltAngle)
+        pan.set_angle(panAngle)
+        tilt.set_angle(tiltAngle)
         #endregion init
 
         # region servo control
@@ -212,26 +220,26 @@ The code in this article looks slightly complicated, we can split it into three 
             global panAngle,tiltAngle       
             if key == 'w':
                 tiltAngle -= 1
-                tiltAngle = limit(tiltAngle, -90, 90)
-                tilt.angle(tiltAngle)
+                tiltAngle = limit(tiltAngle, -90, 30)
+                tilt.set_angle(tiltAngle)
             if key == 's':
                 tiltAngle += 1
-                tiltAngle = limit(tiltAngle, -90, 90)
-                tilt.angle(tiltAngle)
+                tiltAngle = limit(tiltAngle, -90, 30)
+                tilt.set_angle(tiltAngle)
             if key == 'a':
                 panAngle += 1
                 panAngle = limit(panAngle, -90, 90)
-                pan.angle(panAngle)
+                pan.set_angle(panAngle)
             if key == 'd':
                 panAngle -= 1
                 panAngle = limit(panAngle, -90, 90)
-                pan.angle(panAngle)
+                pan.set_angle(panAngle)
 
         # endregion
 
         def main():
             while True:
-                key = readchar()
+                key = readchar().lower()
                 servo_control(key)
 
         if __name__ == "__main__":
@@ -242,23 +250,25 @@ The code in this article looks slightly complicated, we can split it into three 
 
     .. code-block:: python
 
-        from time import sleep
-        from sunfounder_io import PWM,Servo,I2C
+        from time import sleep,strftime,localtime
+        from servo import Servo
 
-        I2C().reset_mcu()
-        sleep(0.01)
+        ### The readchar part is omitted here ###
 
-        pan = Servo(PWM("P1"))
-        tilt = Servo(PWM("P0"))
+ 
+        # region servos init
+        pan = Servo(pin=13, min_angle=-90, max_angle=90) # pan_servo_pin (BCM)
+        tilt = Servo(pin=12, min_angle=-90, max_angle=30) # be careful to limit the angle of the steering gear
         panAngle = 0
         tiltAngle = 0
-        pan.angle(panAngle)
-        tilt.angle(tiltAngle)
+        pan.set_angle(panAngle)
+        tilt.set_angle(tiltAngle)
+        #endregion init
 
 
-    * Among them, ``I2C().reset_mcu()`` is used to reset Pan-tilt HAT, which can help you reduce many accidents. It is recommended to add it in every example of using a steering gear.
-    * And ``tilt = Servo(PWM("P0"))`` is used to init the servo object. Here, the servo connected to P0 is declared as an object named ``tilt`` .
-    * As for ``tilt.angle(angle)`` , it directly controls the tiltServo, which is the angle of the servo connected to P0.
+
+    * And ``tilt = Servo(pin=12, min_angle=-90, max_angle=30)`` is used to init the servo object. Here, the servo connected to 12 is declared as an object named ``tilt`` .
+    * As for ``tilt.set_angle(tiltAngle)`` , it directly controls the tiltServo, which is the angle of the servo connected to 12.
 
 
 #. Finally, let’s take a look at the photo section, which is roughly similar to :ref:`Take Photo`, but with the addition of continuous shooting.
@@ -277,8 +287,9 @@ The code in this article looks slightly complicated, we can split it into three 
             for i in range(number):
                 Vilib.take_photo(photo_name='%03d'%i,path=path)
                 print("take_photo: %s"%i)
-                sleep(interval_ms*0.001)
-            print("continuous_shooting done ")
+                sleep(interval_ms/1000)
+            print("continuous_shooting done,the pictures save as %s"%path)
+            sleep(0.2)
 
         def main():
             Vilib.camera_start(vflip=True,hflip=True) 
@@ -287,7 +298,7 @@ The code in this article looks slightly complicated, we can split it into three 
             path = "/home/pi/Pictures/continuous_shooting"
         
             while True:
-                key = readchar()
+                key = readchar().lower()
                 #servo_control(key)
                 if key == 'q': 
                     continuous_shooting(path,interval_ms=50,number=10)

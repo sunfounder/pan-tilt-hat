@@ -47,17 +47,22 @@ Then you can enter ``http://<your IP>:9000/mjpg`` in the browser to view the vid
 
 .. code-block:: python
 
-    from time import perf_counter, sleep,strftime,localtime
+    #!/usr/bin/env python3
+    '''
+        Time-lapse photography based on the Raspistill command
+    '''
+    from time import time, sleep, strftime, localtime
     from vilib import Vilib
-    from sunfounder_io import PWM,Servo,I2C
-    import cv2
     import os
     import sys
+    sys.path.append('./')
+    from servo import Servo
+    # import readchar
+    import cv2
+    import threading
     import tty
     import termios
-    import threading
 
-    # region  read keyboard 
     def readchar():
         fd = sys.stdin.fileno()
         old_settings = termios.tcgetattr(fd)
@@ -67,6 +72,8 @@ Then you can enter ``http://<your IP>:9000/mjpg`` in the browser to view the vid
         finally:
             termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
         return ch
+        
+
 
     manual = '''
     Press keys on keyboard to record value!
@@ -80,17 +87,15 @@ Then you can enter ``http://<your IP>:9000/mjpg`` in the browser to view the vid
     '''
     # endregion
 
-    # region init
-    I2C().reset_mcu()
-    sleep(0.01)
-
-    pan = Servo(PWM("P1"))
-    tilt = Servo(PWM("P0"))
+    # region servos init
+    pan = Servo(pin=13, min_angle=-90, max_angle=90) # pan_servo_pin (BCM)
+    tilt = Servo(pin=12, min_angle=-90, max_angle=30) # be careful to limit the angle of the steering gear
     panAngle = 0
     tiltAngle = 0
-    pan.angle(panAngle)
-    tilt.angle(tiltAngle)
-    # endregion
+    pan.set_angle(panAngle)
+    tilt.set_angle(tiltAngle)
+
+    #endregion init
 
     # # check dir 
     def check_dir(dir):
@@ -113,44 +118,44 @@ Then you can enter ``http://<your IP>:9000/mjpg`` in the browser to view the vid
         global panAngle,tiltAngle       
         if key == 'w':
             tiltAngle -= 1
-            tiltAngle = limit(tiltAngle, -90, 90)
-            tilt.angle(tiltAngle)
+            tiltAngle = limit(tiltAngle, -90, 30)
+            tilt.set_angle(tiltAngle)
         if key == 's':
             tiltAngle += 1
-            tiltAngle = limit(tiltAngle, -90, 90)
-            tilt.angle(tiltAngle)
+            tiltAngle = limit(tiltAngle, -90, 30)
+            tilt.set_angle(tiltAngle)
         if key == 'a':
             panAngle += 1
             panAngle = limit(panAngle, -90, 90)
-            pan.angle(panAngle)
+            pan.set_angle(panAngle)
         if key == 'd':
             panAngle -= 1
             panAngle = limit(panAngle, -90, 90)
-            pan.angle(panAngle)
+            pan.set_angle(panAngle)
 
     # endregion servo control
 
     # Video synthesis
-    def video_synthesis(name:str,input:str,output:str,fps=30,format='.jpg',datetime=False):
+    def video_synthesis(name:str,output:str,path:str,fps=30,format='.jpg',datetime=False):
 
-        print('processing video, please wait ....')
+        print('\nprocessing video, please wait ....')
 
         # video parameter
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        out = cv2.VideoWriter(output+'/'+name, fourcc, fps, (640,480))
+        out = cv2.VideoWriter(path+'/'+name+'.avi', fourcc, fps, (640,480))
         width = 640
         height = 480
 
         # traverse
     
-        for root, dirs, files in os.walk(input):
-            print('%s pictures be processed'%len(files))
+        for root, dirs, files in os.walk(output):
+            print('%s pictures need to be processed ...'%len(files))
             files = sorted(files)
             for file in files:
                 # print('Format:',os.path.splitext(file)[1])
                 if os.path.splitext(file)[1] == format:
                     # imread
-                    frame = cv2.imread(input+'/'+file)
+                    frame = cv2.imread(output+'/'+file)
                     # add datetime watermark
                     if datetime == True:
                         # print('name:',os.path.splitext(file)[1])
@@ -161,18 +166,21 @@ Then you can enter ``http://<your IP>:9000/mjpg`` in the browser to view the vid
                         hour = time[3]
                         minute = time[4]
                         second = time[5]
-                        frame = cv2.putText(frame,'%s.%s.%s %s:%s:%s'%(year,month,day,hour,minute,second),
-                                            (width - 180, height - 25),cv2.FONT_HERSHEY_SIMPLEX, 0.5,
-                                            (255, 255, 255),1,cv2.LINE_AA)   # anti-aliasing
+                        frame = cv2.putText(frame, 
+                                            '%s.%s.%s %s:%s:%s'%(year,month,day,hour,minute,second),
+                                            (width - 180, height - 25), 
+                                            cv2.FONT_HERSHEY_SIMPLEX, 0.5,
+                                            (255, 255, 255),
+                                            1, 
+                                            cv2.LINE_AA)   # anti-aliasing
                     # write video
                     out.write(frame)
 
         # release the VideoWriter object
         out.release()
-
-        # remove photos
-        os.system('sudo rm -r %s'%input)
-        print('Done.The video save as %s/%s'%(output,name))
+        # remove photos cache
+        os.system('sudo rm -r %s'%output)
+        print('\nDone.The video save as %s/%s'%(path,name))
 
     # keyboard scan thread
     key = None
@@ -181,60 +189,64 @@ Then you can enter ``http://<your IP>:9000/mjpg`` in the browser to view the vid
         global key
         while True:
             key = None
-            key = readchar()
+            key = readchar().lower()
             sleep(0.01)
             if breakout_flag==True:
                 break
             
     # continuous_shooting
-    def continuous_shooting(path,interval_ms:int=3000):
-        print('Start time-lapse photography, press the "e" key to stop')   
+    def continuous_shooting(path, interval_s=3, duration_s=3600):
+        print('\nStart time-lapse photography, press the "e" key to stop')   
 
-        delay = 10 # ms
+        start_time = time()
+        node_time = start_time
 
-        count = 0
-        while True:    
-            if count == interval_ms/delay:
-                count = 0
+        while True: 
+            
+            if time()-node_time > interval_s:
+                node_time = time()
                 Vilib.take_photo(photo_name=strftime("%Y-%m-%d-%H-%M-%S", localtime()),path=path)
-            if key == 'e':
+            if key == 'e' or time()-start_time > duration_s:
                 break
-            count += 1
-            sleep(delay/1000) # second
+            sleep(0.01) # second
+
 
     # main
     def main():
-
-        print(manual)
-
+        global key
+        
+        
         Vilib.camera_start(vflip=True,hflip=True)
         Vilib.display(local=True,web=True)
 
-        sleep(1)
+        sleep(2)
+        print(manual)
+        sleep(0.2)
         t = threading.Thread(target=keyboard_scan)
         t.setDaemon(True)
         t.start()
         
-        
+        path = "/home/pi/Videos/vilib/time_lapse"
+        check_dir(path)
+
         while True:
             servo_control(key)
 
             # time-lapse photography
             if key == 'q':
-
-                #check path
-                output = "/home/pi/Pictures/time_lapse" # -o
-                input = output+'/'+strftime("%Y-%m-%d-%H-%M-%S", localtime())
-                check_dir(input)
+                # check path
+                output = path+'/'+strftime("%Y-%m-%d-%H-%M-%S", localtime())
                 check_dir(output)
-
-                # take_photo
-                continuous_shooting(input,interval_ms=3000)
-                
+                # take a picture every 3 seconds for 3600 seconds
+                continuous_shooting(output, interval_s=3, duration_s=3600)
                 # video_synthesis
-                name=strftime("%Y-%m-%d-%H-%M-%S", localtime())+'.avi'
-                video_synthesis(name=name,input=input,output=output,fps=30,format='.jpg',datetime=True)
-                
+                name=strftime("%Y-%m-%d-%H-%M-%S", localtime())
+                video_synthesis(name=name,
+                                output=output,
+                                path=path,
+                                fps=30,
+                                format='.jpg',
+                                datetime=True)       
             # esc
             if key == 'g':
                 Vilib.camera_close()
@@ -247,6 +259,9 @@ Then you can enter ``http://<your IP>:9000/mjpg`` in the browser to view the vid
 
     if __name__ == "__main__":
         main()
+
+
+.. 5.31 mark
 
 **How it works?**
 
@@ -286,7 +301,7 @@ Similar to :ref:`Continuous Shooting`, this example also needs to be split for a
             global key
             while True:
                 key = None
-                key = readchar()
+                key = readchar().lower()
                 sleep(0.01)
                 if breakout_flag==True:
                     break
@@ -331,13 +346,13 @@ Similar to :ref:`Continuous Shooting`, this example also needs to be split for a
 
         # main
         def main():
-            
+            path = "/home/pi/Videos/vilib/time_lapse"
+            check_dir(path)
+
             while True:
                 if key == 'q':
                     #check path
-                    output = "/home/pi/Pictures/time_lapse" # -o
-                    input = output+'/'+strftime("%Y-%m-%d-%H-%M-%S", localtime())
-                    check_dir(input)
+                    output = path+'/'+strftime("%Y-%m-%d-%H-%M-%S", localtime())
                     check_dir(output)
 
                     # take_photo
@@ -346,7 +361,8 @@ Similar to :ref:`Continuous Shooting`, this example also needs to be split for a
 
         if __name__ == "__main__":
             main()
-    The target directory for our output videos is ``output``. And generating video requires a large number of temporary still photos, which are stored in ``input``. The function of ``check_dir()`` is to check whether the target folder exists, and create it if it does not exist.
+
+    The target directory for our output videos is ``path``. And generating video requires a large number of temporary still photos, which are stored in ``output``. The function of ``check_dir()`` is to check whether the target folder exists, and create it if it does not exist.
 
     An ``os`` library is imported here, which allows python to use related functions of the operating system. Such as reading and writing files, creating files and directories, and manipulate paths. For details, please see `OS - Python Docs <https://docs.python.org/3/library/os.html>`_.
 
@@ -354,24 +370,24 @@ Similar to :ref:`Continuous Shooting`, this example also needs to be split for a
 
     .. code-block:: python
 
-        from time import perf_counter, sleep,strftime,localtime
+        from time import time, sleep, strftime, localtime
         from vilib import Vilib
 
-
         # continuous_shooting
-        def continuous_shooting(path,interval_ms:int=3000):
-            print('Start time-lapse photography, press the "e" key to stop')   
+        def continuous_shooting(path, interval_s=3, duration_s=3600):
+            print('\nStart time-lapse photography, press the "e" key to stop')   
 
-            delay = 10 # ms
-            count = 0
-            while True:    
-                if count == interval_ms/delay:
-                    count = 0
+            start_time = time()
+            node_time = start_time
+
+            while True: 
+                
+                if time()-node_time > interval_s:
+                    node_time = time()
                     Vilib.take_photo(photo_name=strftime("%Y-%m-%d-%H-%M-%S", localtime()),path=path)
-                if key == 'e':
+                if key == 'e' or time()-start_time > duration_s:
                     break
-                count += 1
-                sleep(delay/1000) # second
+                sleep(0.01) # second
 
         # main
         def main():
@@ -384,8 +400,8 @@ Similar to :ref:`Continuous Shooting`, this example also needs to be split for a
                 if key == 'q':
                     #check path
 
-                    # take_photo
-                    continuous_shooting(input,interval_ms=3000)
+                    # take a picture every 3 seconds for 3600 seconds
+                    continuous_shooting(output, interval_s=3, duration_s=3600)
                     
                     # video_synthesis
                     
@@ -398,36 +414,36 @@ Similar to :ref:`Continuous Shooting`, this example also needs to be split for a
         if __name__ == "__main__":
             main()
 
-5. **Video synthesis**: It uses the photos stored in the ``input`` path as frames, and generates a video output to the ``output`` path.
+5. **Video synthesis**: It uses the photos stored in the ``output`` path as frames, and generates a video output to the ``path``.
 
     .. code-block:: python
 
-        from time import perf_counter, sleep,strftime,localtime
+        from time import time, sleep, strftime, localtime
         from vilib import Vilib
         import cv2
         import os
 
         # Video synthesis
-        def video_synthesis(name:str,input:str,output:str,fps=30,format='.jpg',datetime=False):
+        def video_synthesis(name:str,output:str,path:str,fps=30,format='.jpg',datetime=False):
 
-            print('processing video, please wait ....')
+            print('\nprocessing video, please wait ....')
 
             # video parameter
             fourcc = cv2.VideoWriter_fourcc(*'XVID')
-            out = cv2.VideoWriter(output+'/'+name, fourcc, fps, (640,480))
+            out = cv2.VideoWriter(path+'/'+name+'.avi', fourcc, fps, (640,480))
             width = 640
             height = 480
 
             # traverse
         
-            for root, dirs, files in os.walk(input):
-                print('%s pictures be processed'%len(files))
-                file = sorted(files)
+            for root, dirs, files in os.walk(output):
+                print('%s pictures need to be processed ...'%len(files))
+                files = sorted(files)
                 for file in files:
                     # print('Format:',os.path.splitext(file)[1])
                     if os.path.splitext(file)[1] == format:
                         # imread
-                        frame = cv2.imread(input+'/'+file)
+                        frame = cv2.imread(output+'/'+file)
                         # add datetime watermark
                         if datetime == True:
                             # print('name:',os.path.splitext(file)[1])
@@ -438,18 +454,21 @@ Similar to :ref:`Continuous Shooting`, this example also needs to be split for a
                             hour = time[3]
                             minute = time[4]
                             second = time[5]
-                            frame = cv2.putText(frame, '%s.%s.%s %s:%s:%s'%(year,month,day,hour,minute,second),
-                                                (width - 180, height - 25), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
-                                                (255, 255, 255),1,cv2.LINE_AA)   # anti-aliasing
+                            frame = cv2.putText(frame, 
+                                                '%s.%s.%s %s:%s:%s'%(year,month,day,hour,minute,second),
+                                                (width - 180, height - 25), 
+                                                cv2.FONT_HERSHEY_SIMPLEX, 0.5,
+                                                (255, 255, 255),
+                                                1, 
+                                                cv2.LINE_AA)   # anti-aliasing
                         # write video
                         out.write(frame)
 
             # release the VideoWriter object
             out.release()
-
-            # remove photos
-            os.system('sudo rm -r %s'%input)
-            print('Done.The video save as %s/%s'%(output,name))
+            # remove photos cache
+            os.system('sudo rm -r %s'%output)
+            print('\nDone.The video save as %s/%s'%(path,name))
 
         # main
         def main()
@@ -459,8 +478,13 @@ Similar to :ref:`Continuous Shooting`, this example also needs to be split for a
                     # take_photo
                     
                     # video_synthesis
-                    name=strftime("%Y-%m-%d-%H-%M-%S", localtime())+'.avi'
-                    video_synthesis(name=name,input=input,output=output,fps=30,format='.jpg',datetime=True)
+                    name=strftime("%Y-%m-%d-%H-%M-%S", localtime())
+                    video_synthesis(name=name,
+                                    output=output,
+                                    path=path,
+                                    fps=30,
+                                    format='.jpg',
+                                    datetime=True)   
                     
 
         if __name__ == "__main__":
@@ -513,5 +537,6 @@ Similar to :ref:`Continuous Shooting`, this example also needs to be split for a
 
     .. code-block:: python
 
-        # remove photos
-        os.system('sudo rm -r %s'%input)
+        # remove photos cache
+        os.system('sudo rm -r %s'%output)
+        print('\nDone.The video save as %s/%s'%(path,name))
