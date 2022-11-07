@@ -3,12 +3,17 @@ import pigpio
 from time import sleep
 # Start the pigpiod daemon
 import subprocess
-p = subprocess.Popen('sudo pigpiod', shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-# result = p.stdout.read().decode('utf-8')
-# status = p.poll()
-# print(status,result)
-
-# AttributeError
+result = None
+status = 1
+for x in range(3):
+    p = subprocess.Popen('sudo pigpiod', shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    result = p.stdout.read().decode('utf-8')
+    status = p.poll()
+    if status == 0:
+        break
+    sleep(0.2)
+if status != 0:
+    print(status, result)
 '''
 > Use the DMA PWM of the pigpio library to drive the servo
 > Map the servo angle (0 ~ 180 degree) to (-90 ~ 90 degree)

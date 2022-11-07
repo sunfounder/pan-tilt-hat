@@ -34,7 +34,7 @@ Download this repository to your Raspberry Pi:
 cd ~
 git clone https://github.com/sunfounder/pan-tilt-hat.git
 cd ~/pan-tilt-hat
-sudo python3 install_dependencies.py
+sudo python3 install.py
 ```
 ## Usage
 
