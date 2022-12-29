@@ -15,11 +15,13 @@
 # sys.path.insert(0, os.path.abspath('.'))
 
 
-# -- Project information -----------------------------------------------------
 import sphinx_rtd_theme
+import time
 
-project = 'SunFounder PiCrawler Kit'
-copyright = '2021, sunfounder'
+# -- Project information -----------------------------------------------------
+
+project = 'SunFounder Pan-tilt HAT Kit'
+copyright = f'{time.localtime().tm_year}, SunFounder'
 author = 'www.sunfounder.com'
 
 
@@ -50,7 +52,7 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 
 html_js_files = [
-    'https://ezblock.cc/readDocFile/topHead.js',
+    'https://ezblock.cc/readDocFile/custom.js',
     'https://ezblock.cc/readDocFile/readTheDoc/src/js/ace.js',
     'https://ezblock.cc/readDocFile/readTheDoc/src/js/mode-python.js',
     'https://ezblock.cc/readDocFile/readTheDoc/src/js/mode-sh.js',
@@ -60,7 +62,7 @@ html_js_files = [
     'https://ezblock.cc/readDocFile/readTheDoc/src/js/readTheDocIndex.js',
 ]
 html_css_files = [
-    'https://ezblock.cc/readDocFile/topHead.css',
+    'https://ezblock.cc/readDocFile/custom.css',
     'https://ezblock.cc/readDocFile/readTheDoc/src/css/index.css',
     'https://ezblock.cc/readDocFile/readTheDoc/src/css/xterm.css',
 ]
