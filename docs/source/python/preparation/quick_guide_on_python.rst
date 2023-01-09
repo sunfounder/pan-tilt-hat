@@ -12,6 +12,7 @@ If you are familiar with Raspberry Pi and can open the command line successfully
 
     what_do_we_need
     installing_the_os
-    set_up_your_raspberry_pi    
+    set_up_your_raspberry_pi
+    enable_i2c_camera    
     download_and_run_code
 
