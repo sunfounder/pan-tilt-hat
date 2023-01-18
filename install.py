@@ -81,7 +81,7 @@ def install():
         os.chdir(user_home)
         os.system('git clone https://github.com/sunfounder/vilib.git')
         os.system('sudo chown -R %s:%s vilib'%(username, username))
-        os.chdir('/home/pi/vilib')
+        os.chdir(f"{user_home}/vilib")
         os.system('sudo python3 install.py')
 
     # -------- install pigpio --------
