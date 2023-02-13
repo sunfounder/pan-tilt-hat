@@ -19,7 +19,7 @@ Visit the download page: https://www.raspberrypi.org/software/. Click on
 the link for the Raspberry Pi Imager that matches your operating system,
 when the download finishes, click it to launch the installer.
 
-.. image:: media/image11.png
+.. image:: img/image11.png
     :align: center
 
 
@@ -32,7 +32,7 @@ message:
 If this pops up, click on **More info** and then **Run anyway**, then
 follow the instructions to install the Raspberry Pi Imager.
 
-.. image:: media/image12.png
+.. image:: img/image12.png
     :align: center
 
 **Step 3**
@@ -44,7 +44,7 @@ Insert your SD card into the computer or laptop SD card slot.
 .. In the Raspberry Pi Imager, select the OS that you want to install and
 .. the SD card you would like to install it on.
 
-.. .. image:: media/image13.png
+.. .. image:: img/image13.png
 ..     :align: center
 
 .. .. note:: 
@@ -57,7 +57,7 @@ Insert your SD card into the computer or laptop SD card slot.
 
 .. Download the `raspios_armhf-2020-05-28 <https://downloads.raspberrypi.org/raspios_armhf/images/raspios_armhf-2021-05-28/2021-05-07-raspios-buster-armhf.zip>`_ image and select it in Raspberry Pi Imager.
 
-.. .. image:: media/otherOS.png
+.. .. image:: img/otherOS.png
 ..     :align: center
 
 .. .. warning::
@@ -69,13 +69,13 @@ Insert your SD card into the computer or laptop SD card slot.
 
 In the Raspberry Pi Imager, click **CHOOSE OS** -> **Raspberry Pi OS(other)**.
 
-.. image:: media/3d33.png
+.. image:: img/3d33.png
     :align: center
 
 Scroll down to the end of the newly opened page and you will see **Raspberry Pi OS(Legacy)** and **Raspberry Pi OS Lite(Legacy)**, these are security updates for Debian Buster, the difference between them is with or without the desktop.
 It is recommended to install **Raspberry Pi OS(Legacy)**, the system with the desktop.
 
-.. image:: media/3d34.png
+.. image:: img/3d34.png
     :align: center
 
 
@@ -83,7 +83,7 @@ It is recommended to install **Raspberry Pi OS(Legacy)**, the system with the de
 
 Select the SD card you are using.
 
-.. image:: media/image14.png
+.. image:: img/image14.png
     :align: center
 
 **Step 6**
@@ -94,7 +94,7 @@ Enable ssh and set the username and name. You can choose to always use this imag
 .. note::
     When the Set hostname box is not checked, the default hostname will still be ``raspberrypi``, and we will use this hostname to access the Raspberry Pi remotely.
 
-.. image:: media/image15.png
+.. image:: img/image15.png
     :align: center
 
 Then scroll down to complete the wifi configuration and click **SAVE**.
@@ -103,14 +103,14 @@ Then scroll down to complete the wifi configuration and click **SAVE**.
 
     **wifi country** should be set the two-letter `ISO/IEC alpha2 code <https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements>`_ for the country in which you are using your Raspberry Pi.
 
-.. image:: media/image16.png
+.. image:: img/image16.png
     :align: center
 
 **Step 7**
 
 Click the **WRITE** button.
 
-.. image:: media/image17.png
+.. image:: img/image17.png
     :align: center
 
 **Step 8**
@@ -119,7 +119,7 @@ If your SD card currently has any files on it, you may wish to back up
 these files first to prevent you from permanently losing them. If there
 is no file to be backed up, click **Yes**.
 
-.. image:: media/image18.png
+.. image:: img/image18.png
     :align: center
 
 **Step 9**
@@ -127,5 +127,5 @@ is no file to be backed up, click **Yes**.
 After waiting for a period of time, the following window will appear to
 represent the completion of writing.
 
-.. image:: media/image19.png
+.. image:: img/image19.png
     :align: center

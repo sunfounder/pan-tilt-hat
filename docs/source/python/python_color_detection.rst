@@ -6,7 +6,7 @@ Say a color and mark it in the field of view. This is not difficult for most hum
 For computers, thanks to deep learning, such tasks can also be accomplished. In this project, there is an algorithm that can find a certain color (6 kinds in total), such as finding "orange".
 
 
-.. image:: image/sp211116_105443.png
+.. image:: img/sp211116_105443.png
 
 **Run the Code**
 
@@ -35,7 +35,7 @@ After the code runs, the terminal will display the following prompt:
 
 Then you can enter ``http://<your IP>:9000/mjpg`` in the browser to view the video screen. such as:  ``https://192.168.18.113:9000/mjpg``
 
-.. image:: image/display.png
+.. image:: img/display.png
 
 **Call the Function**
 
@@ -64,7 +64,7 @@ Please follow the prompts to activate the corresponding functions.
 
         Entering a number between ``1~6`` will detect one of the colors in "red, orange, yellow, green, blue, purple". Enter ``0`` to turn off color detection.
 
-        .. image:: image/DTC2.png
+        .. image:: img/DTC2.png
 
         .. note:: You can download and print the :download:`PDF Color Cards <https://github.com/sunfounder/sf-pdf/raw/master/prop_card/object_detection/color-cards.pdf>` for color detection.
 

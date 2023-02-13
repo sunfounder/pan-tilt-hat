@@ -40,7 +40,7 @@ After the code runs, the terminal will display the following prompt:
 
 Then you can enter ``http://<your IP>:9000/mjpg`` in the browser to view the video screen. such as:  ``http://192.168.18.113:9000/mjpg``
 
-.. image:: image/display.png
+.. image:: img/display.png
 
 
 **Code**

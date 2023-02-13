@@ -28,7 +28,7 @@ Any Raspberry Pi   1 \* Power Adapter
 
 #. Use the power adapter to power the Raspberry Pi. After a few seconds, the Raspberry Pi OS desktop will be displayed.
 
-    .. image:: media/image20.png
+    .. image:: img/image20.png
         :align: center
 
 If You Have No Screen

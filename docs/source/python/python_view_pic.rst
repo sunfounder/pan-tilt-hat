@@ -75,23 +75,23 @@ Input the following content at the end of the file:
 
 Under This PC, click **Map network drive**.
 
-.. image:: image/image10.jpg
+.. image:: img/image10.jpg
     :align: center
 
 Type ``\\hostname or IP address\the name of the shared files`` in the path bar. 
 
-.. image:: image/image11.jpg
+.. image:: img/image11.jpg
     :align: center
 
 Type in the username and the password. Click OK button, 
 and you can access the shared files.
 
-.. image:: image/image12.png
+.. image:: img/image12.png
     :align: center
 
 The album will appear as a new volume under this PC.
 
-.. image:: image/13.png
+.. image:: img/13.png
     :align: center
 
 
@@ -105,26 +105,26 @@ File.
 
 1. Open **Files**.
 
-.. image:: image/14.png
+.. image:: img/14.png
     :align: center
 
 2. Tap **Connect to Server** in **「Menu」**.
 
-.. image:: image/15.png
+.. image:: img/15.png
     :align: center
 
 
 3. Enter your Rascam IP address.
 
-.. image:: image/16.png
+.. image:: img/16.png
     :align: center
 
 4. Log in.
 
-.. image:: image/17.png
+.. image:: img/17.png
     :align: center
 
 5. Now, you can directly access the photo album in File.
 
-.. image:: image/18.png
+.. image:: img/18.png
     :align: center

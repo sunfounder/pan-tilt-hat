@@ -30,10 +30,10 @@ Before assembling the Pan-tilt HAT, follow the instructions on how to install th
 
 Temporarily combine the HAT and Raspberry Pi. Run "Color Detection" Example (This example will put the servo at the zero position).
 
-.. image:: media/sp211112_112507.png
+.. image:: img/sp211112_112507.png
 
 Insert the servo cable into the P0 & P1 port. Now the servo arm should return to the 0° position. 
 
 To make sure the servo has been correctly set to 0°, first gently insert a rocker arm in the servo shaft, then slightly rotate the rocker arm to a different angle.
 
-.. image:: media/servo_arm.png
+.. image:: img/servo_arm.png

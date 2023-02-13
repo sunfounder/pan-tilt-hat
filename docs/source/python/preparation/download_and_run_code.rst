@@ -37,12 +37,12 @@ Run the ``servo_zeroing.py`` in the ``examples/`` folder.
 
 To make sure you can see that the servo has been set to 0°, you can insert a rocker arm in the servo shaft first and then turn the servo to another angle.
 
-.. image:: media/servo_arm.png
+.. image:: img/servo_arm.png
     :align: center
 
 Now follow the diagram below and insert the servo to the 12/13 position.
 
 
-.. image:: media/sp211112_112507.png
+.. image:: img/sp211112_112507.png
 
 Now if the servo arm shifts and stops at a specific position, the function will take effect. If it is not, please check the insertion direction of the servo cable and re-run the code.

@@ -3,8 +3,9 @@ Appendix
 
 
 .. toctree::
-
+    
+    login_windows
+    install_openssh_powershell
     filezilla
-    get_ip
 
 

@@ -14,7 +14,7 @@ Python.
 
 Our kit applies to the following versions of the product of Raspberry Pi
 
-.. image:: media/image10.jpeg
+.. image:: img/image10.jpeg
    :alt: RPi2
    :width: 5.61806in
    :height: 4.76875in

@@ -6,7 +6,7 @@ It will uniformly calibrate the face according to the key points in the face (su
 This technology is widely used in security and other scenarios.
 
 
-.. image:: image/DTC5.png
+.. image:: img/DTC5.png
 
 **Run the Code**
 
@@ -35,7 +35,7 @@ After the code runs, the terminal will display the following prompt:
 
 Then you can enter ``http://<your IP>:9000/mjpg`` in the browser to view the video screen. such as:  ``https://192.168.18.113:9000/mjpg``
 
-.. image:: image/display.png
+.. image:: img/display.png
 
 **Code** 
 

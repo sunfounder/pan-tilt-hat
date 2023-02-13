@@ -6,7 +6,7 @@ When you see a rabbit, you will directly say its name. The computer will tell yo
 We use image classification to reveal the cognitive model of computer vision. Image classification is a basic task. A trained model is used to identify images representing various objects, and then the images are assigned to specific tags to classify the images.
 
 
-.. image:: image/sp21bb.png
+.. image:: img/sp21bb.png
 
 
 
@@ -37,7 +37,7 @@ After the code runs, the terminal will display the following prompt:
 
 Then you can enter ``http://<your IP>:9000/mjpg`` in the browser to view the video screen. such as:  ``https://192.168.18.113:9000/mjpg``
 
-.. image:: image/display.png
+.. image:: img/display.png
 
 
 **Code** 
@@ -78,13 +78,13 @@ If you want to try to create your own model. We strongly recommend that you use 
 
 1. Open `Teachable Machine <https://teachablemachine.withgoogle.com/>`_, you will see an obvious Get Start on the web page, click on it.
 
-    .. image:: image/tm1.png
+    .. image:: img/tm1.png
 
 2. Select Image Project (Audio Project and Pose Project are not applicable here). You will be prompted to choose Standard image model or Embedded image model. The former has a higher accuracy rate and the latter has a faster speed. We recommend choosing the first one.
 
-    .. image:: image/tm2.png
+    .. image:: img/tm2.png
 
-    .. image:: image/tm3.png
+    .. image:: img/tm3.png
 
 3. Train the model. Teachable Machine provides a detailed video step-by-step explanation, please see:
 
@@ -106,7 +106,7 @@ If you want to try to create your own model. We strongly recommend that you use 
 
         The export settings applicable to this project are shown in the figure:
 
-        .. image:: image/tm4.png
+        .. image:: img/tm4.png
 
 4. Unzip the downloaded zip file, you will be able to see the model file and label file, their formats are ``.tflite`` and ``.txt`` respectively. Use :ref:`Filezilla Software` to copy them to the ``/home/pi/pan-tilt-hat/models/`` directory of the Raspberry Pi.
 

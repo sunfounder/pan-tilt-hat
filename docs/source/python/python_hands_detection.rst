@@ -5,7 +5,7 @@ Hand detection is a research hotspot in the field of human-computer interaction,
 
 In this project, you will see that the hand in front of the camera is recognized and the coordinates of the index finger will be printed.
 
-.. image:: image/sp211116_104034.png
+.. image:: img/sp211116_104034.png
 
 **Run the Code**
 
@@ -34,7 +34,7 @@ After the code runs, the terminal will display the following prompt:
 
 Then you can enter ``http://<your IP>:9000/mjpg`` in the browser to view the video screen. such as:  ``https://192.168.18.113:9000/mjpg``
 
-.. image:: image/display.png
+.. image:: img/display.png
 
 
 **Code**
@@ -71,7 +71,7 @@ The information detected by the target will be stored in the ``Vilib.detect_obj_
 
 The three-dimensional coordinates of the 21 joints of the hand are stored here, such as the ``joints[8]`` printed in this article, that is, the coordinates of the index finger. The serial numbers of all joints are shown in the figure below.
 
-.. image:: image/hand_landmarks.png
+.. image:: img/hand_landmarks.png
 
 The coordinates of these joints are composed of [x,y,z]. x and y are normalized to 0.0 ~ 1.0 by the width and height of the image (rather than the specific pixel position), the upper left corner of the screen is [0.0, 0.0], and the lower right corner is [1.0, 1.0]. The z coordinate represents the depth, and the wrist depth is the origin. The smaller the value, the closer the landmark is to the camera. The size of z uses roughly the same ratio as x.
 

@@ -5,7 +5,7 @@ A panorama is a wide-angle view or representation of the physical space, which i
 
 In this article, you will use the slow rotation of the pan-tilt to obtain multiple photos to combine a long panorama picture.
 
-.. image:: image/panorama.png
+.. image:: img/panorama.png
     :width: 800
 
 
@@ -37,7 +37,7 @@ After the code runs, the terminal will display the following prompt:
 
 Then you can enter ``http://<your IP>:9000/mjpg`` in the browser to view the video screen. such as:  ``http://192.168.18.113:9000/mjpg``
 
-.. image:: image/display.png
+.. image:: img/display.png
 
 
 **Code**
