@@ -79,7 +79,7 @@ def install():
 
     if vilib_flag:
         os.chdir(user_home)
-        os.system('git clone https://github.com/sunfounder/vilib.git')
+        os.system('git clone -b picamera2 https://github.com/sunfounder/vilib.git')
         os.system('sudo chown -R %s:%s vilib'%(username, username))
         os.chdir(f"{user_home}/vilib")
         os.system('sudo python3 install.py')
@@ -87,11 +87,7 @@ def install():
     # -------- install pigpio --------
     do(msg="install pigpio",
         cmd='sudo apt-get update'
-        + ' && sudo apt-get install -y pigpio python-pigpio python3-pigpio')    
-
-    # -------- install readchar --------
-    do(msg="install readchar",
-        cmd='sudo pip3 install readchar')
+        + ' && sudo apt-get install -y python3-pigpio')    
 
     # check errors
     if len(errors) == 0:
