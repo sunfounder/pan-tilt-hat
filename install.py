@@ -40,7 +40,7 @@ def do(msg="", cmd=""):
     global at_work_tip_sw
     at_work_tip_sw = True
     _thread = threading.Thread(target=working_tip)
-    _thread.setDaemon(True)
+    _thread.daemon = True
     _thread.start()
     # process run
     status, result = run_command(cmd)
@@ -48,7 +48,7 @@ def do(msg="", cmd=""):
     # at_work_tip stop
     at_work_tip_sw = False
     while _thread.is_alive():
-        time.sleep(0.1)
+        time.sleep(0.01)
     # status
     if status == 0 or status == None or result == "":
         print('Done')
