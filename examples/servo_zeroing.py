@@ -7,10 +7,11 @@ from time import sleep
 pan = Servo(pin=13) # pan_servo_pin (BCM)
 tilt = Servo(pin=12) 
 
+pan.set_angle(10)
+tilt.set_angle(10)
+sleep(0.2)
+pan.set_angle(0)
+tilt.set_angle(0)
 while True:
-    pan.set_angle(0)
-    tilt.set_angle(0)
-    sleep(2)
-
-
+    pass
 
