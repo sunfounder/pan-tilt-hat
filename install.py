@@ -47,8 +47,7 @@ def do(msg="", cmd=""):
     # print(status, result)
     # at_work_tip stop
     at_work_tip_sw = False
-    while _thread.is_alive():
-        time.sleep(0.01)
+    _thread.join()
     # status
     if status == 0 or status == None or result == "":
         print('Done')
@@ -83,11 +82,23 @@ def install():
         os.system('sudo chown -R %s:%s vilib'%(username, username))
         os.chdir(f"{user_home}/vilib")
         os.system('sudo python3 install.py')
+    else:
+        try:
+            import vilib
+            print("vilib library import testing ... success")
+        except Exception as e:
+            print("vilib library import testing ... failure")
+            errors.append(f"vilib library import testing error:\n  Error:{e}")
 
     # -------- install pigpio --------
     do(msg="install pigpio",
         cmd='sudo apt-get update'
-        + ' && sudo apt-get install -y python3-pigpio')    
+        + ' && sudo apt-get install -y python3-pigpio')
+
+    # -------- install gpiozero --------
+    # do(msg="install gpiozero",
+    #     cmd='sudo apt-get update'
+    #     + ' && sudo apt-get install -y python3-gpiozero')
 
     # check errors
     if len(errors) == 0:
@@ -105,5 +116,8 @@ if __name__ == "__main__":
         install()
     except KeyboardInterrupt:
         print("\nCanceled.")
+        sys.stdout.write(' \033[1D')
+        sys.stdout.write('\033[?25h') # cursor visible 
+        sys.stdout.flush()
 
 
